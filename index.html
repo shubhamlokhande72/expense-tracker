@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpendSmart – Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+    <span class="brand-icon">₹</span>
+     <span class="brand-name">SpendSmart</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-view="transactions">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Transactions
+      </button>
+      <button class="nav-btn" data-view="analytics">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="export-btn" id="exportCSV">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD VIEW -->
+    <section class="view active" id="view-dashboard">
+      <header class="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="subtitle" id="month-label">Loading...</p>
+        </div>
+        <button class="fab" id="openModal">+ Add Transaction</button>
+      </header>
+
+      <div class="summary-cards">
+        <div class="card card--income">
+          <span class="card-label">Total Income</span>
+          <span class="card-amount" id="total-income">₹0.00</span>
+          <span class="card-tag">This Month</span>
+        </div>
+        <div class="card card--expense">
+          <span class="card-label">Total Expenses</span>
+          <span class="card-amount" id="total-expense">₹0.00</span>
+          <span class="card-tag">This Month</span>
+        </div>
+        <div class="card card--balance">
+          <span class="card-label">Net Balance</span>
+          <span class="card-amount" id="net-balance">₹0.00</span>
+          <span class="card-tag">This Month</span>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-box">
+          <h2 class="section-title">Income vs Expense</h2>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h2 class="section-title">Spending by Category</h2>
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+
+      <div class="recent-box">
+        <h2 class="section-title">Recent Transactions</h2>
+        <ul class="tx-list" id="recent-list"></ul>
+        <p class="empty-msg" id="recent-empty" style="display:none">No transactions yet. Add one above!</p>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS VIEW -->
+    <section class="view" id="view-transactions">
+      <header class="page-header">
+        <div>
+          <h1>Transactions</h1>
+          <p class="subtitle">All your records in one place</p>
+        </div>
+        <button class="fab" id="openModal2">+ Add Transaction</button>
+      </header>
+
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="Search by description…" class="filter-input" />
+        <select id="filterType" class="filter-select">
+          <option value="all">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <select id="filterCategory" class="filter-select">
+          <option value="all">All Categories</option>
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Health">Health</option>
+          <option value="Education">Education</option>
+          <option value="Salary">Salary</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="month" id="filterMonth" class="filter-input" />
+      </div>
+
+      <ul class="tx-list" id="all-list"></ul>
+      <p class="empty-msg" id="all-empty" style="display:none">No transactions match your filters.</p>
+    </section>
+
+    <!-- ANALYTICS VIEW -->
+    <section class="view" id="view-analytics">
+      <header class="page-header">
+        <div>
+          <h1>Analytics</h1>
+          <p class="subtitle">Understand your spending patterns</p>
+        </div>
+      </header>
+
+      <div class="month-nav">
+        <button class="month-btn" id="prevMonth">&#8592;</button>
+        <span class="month-display" id="analyticsMonthLabel"></span>
+        <button class="month-btn" id="nextMonth">&#8594;</button>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="chart-box wide">
+          <h2 class="section-title">Daily Spending Trend</h2>
+          <canvas id="lineChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h2 class="section-title">Category Breakdown</h2>
+          <canvas id="doughnutChart"></canvas>
+        </div>
+        <div class="chart-box">
+          <h2 class="section-title">Top Categories</h2>
+          <div id="categoryBars"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Transaction</h2>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+
+      <div class="type-toggle">
+        <button class="type-btn active" data-type="expense">Expense</button>
+        <button class="type-btn" data-type="income">Income</button>
+      </div>
+
+      <div class="form-group">
+        <label>Description <span class="required">*</span></label>
+        <input type="text" id="f-desc" placeholder="e.g. Lunch at café" maxlength="60" />
+        <span class="field-error" id="err-desc"></span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Amount (₹) <span class="required">*</span></label>
+          <input type="number" id="f-amount" placeholder="0.00" min="0.01" step="0.01" />
+          <span class="field-error" id="err-amount"></span>
+        </div>
+        <div class="form-group">
+          <label>Date <span class="required">*</span></label>
+          <input type="date" id="f-date" />
+          <span class="field-error" id="err-date"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Category <span class="required">*</span></label>
+        <select id="f-category">
+          <option value="">Select category…</option>
+          <option value="Food">🍔 Food</option>
+          <option value="Transport">🚌 Transport</option>
+          <option value="Shopping">🛍 Shopping</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Health">💊 Health</option>
+          <option value="Education">📚 Education</option>
+          <option value="Salary">💼 Salary</option>
+          <option value="Freelance">💻 Freelance</option>
+          <option value="Other">📦 Other</option>
+        </select>
+        <span class="field-error" id="err-category"></span>
+      </div>
+      <div class="form-group">
+        <label>Note (optional)</label>
+        <input type="text" id="f-note" placeholder="Any extra detail…" maxlength="100" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelModal">Cancel</button>
+        <button class="btn-save" id="saveTransaction">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
